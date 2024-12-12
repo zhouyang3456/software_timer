@@ -2,15 +2,37 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <time.h>
+#include <pthread.h>
+#include <unistd.h> // for sleep/usleep
 #include "timer.h"
+
+pthread_t timer_thread;
 
 // Global head of the soft timer linked list
 static SoftTimer *soft_timer_list_head = NULL;
 
+// 定时器处理线程的入口点
+void* timer_thread_func(void* arg) {
+    while (1) {
+        // 调用 process_timers 来处理定时器事件
+        process_timers();
+
+        // 线程休眠一段时间（例如10毫秒），以模拟周期性调用
+        usleep(SOFT_TIMER_TICK_MS * 1000); // 10 ms
+    }
+}
+
 // Initialize the software timer system
 void init_soft_timer_system(void) {
     soft_timer_list_head = NULL;
+ 
+    // 创建定时器处理线程
+    if (pthread_create(&timer_thread, NULL, timer_thread_func, NULL) != 0) {
+        perror("Failed to create timer thread");
+        return EXIT_FAILURE;
+    }
 }
+
 
 // Create a new software timer
 SoftTimer* create_soft_timer(unsigned long timeout_ms, unsigned char mode, void (*callback)(void *param), void *param) {

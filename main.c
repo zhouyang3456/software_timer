@@ -33,7 +33,7 @@ int main() {
 
     // Simulate the main loop where we periodically call process_timers()
     while (1) {
-        process_timers();
+        // process_timers();
         // Simulate a delay that matches our SOFT_TIMER_TICK_MS
         struct timespec ts;
         ts.tv_sec = 0;
